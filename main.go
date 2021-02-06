@@ -65,7 +65,13 @@ func main() {
 	// fmt.Print(items)
 
 	//测试指针存入slice再改变slice中的值会不会修改元数据
-	TestPtrInSlice()
+	//TestPtrInSlice()
+
+	//测试(指针作为struct的字段)和(值作为struct的字段,指针作为方法接收者返回字段的指针)两者是否都由可以修改字段内容
+	//TestValueReceiver()
+
+	//测试 slice 传值问题
+	TestSliceWithPass()
 }
 
 //------------------------test  byteToNum-------------
@@ -439,4 +445,89 @@ func (x *xx) TestPtrInSliceMethod() {
 	}
 	fmt.Println(ll)
 	fmt.Println(*ll[0])
+}
+
+type yy struct {
+	x xx
+}
+
+func (y *yy) TestMethodWithValueReceiver() *xx {
+	return &y.x
+}
+
+func TestValueReceiver() {
+	z := new(yy)
+	z.x = *makeXx()
+	fmt.Print(z.TestMethodWithValueReceiver())
+}
+
+//-----------------------------
+type t20210203 struct {
+	DD []int
+}
+
+func TestSliceWithPass() {
+	ll := make([]int, 0)
+	ll = append(ll, []int{1, 2, 3, 4, 5, 6, 7, 8, 9}...)
+	fmt.Println(ll) //[1 2 3 4 5 6 7 8 9]
+	mid1(ll)
+	fmt.Println(ll) //[3 3 3 3 3 3 3 3 3]
+	X := new(t20210203)
+	X.DD = ll
+	X.mid2()
+	fmt.Println(X.DD) //[3 3 3 3 3 3 3 3 3]
+	fmt.Println(ll)   //[3 3 3 3 3 3 3 3 3]
+	X.mid3()
+	fmt.Println(X.DD) //[4 4 4 4 4 4 4 4 4]
+	fmt.Println(ll)   //[4 4 4 4 4 4 4 4 4]
+	X.mid4()
+	fmt.Println(X.DD) //[]
+	fmt.Println(ll)   //[4 4 4 4 4 4 4 4 4]
+
+	//todo test=>函数里append会让里外slice指向不同值
+	//todo test=>copy()效果
+}
+
+func mid1(s []int) {
+	for _, x := range s { //range复制再循环 不改变原值
+		if x != 0 {
+			x = 2
+		}
+	}
+	fmt.Println(s)                //[1 2 3 4 5 6 7 8 9]
+	for i := 0; i < len(s); i++ { //改变s
+		if s[i] != 0 {
+			s[i] = 2
+		}
+	}
+	fmt.Println(s) //[2 2 2 2 2 2 2 2 2]
+	zz := s
+	for _, x := range zz { //range复制再循环 不改变原值
+		if x != 0 {
+			x = 3
+		}
+	}
+	fmt.Println(zz) //[2 2 2 2 2 2 2 2 2]
+	for i := 0; i < len(zz); i++ {
+		if zz[i] != 0 {
+			zz[i] = 3
+		}
+	}
+	fmt.Println(s) //zz,s全变 //[3 3 3 3 3 3 3 3 3]
+}
+
+func (x t20210203) mid2() { //值接收者直接该字段不生效
+	x.DD = []int{}
+}
+
+func (x t20210203) mid3() { //修改值内容生效并且影响原生数组
+	for i := 0; i < len(x.DD); i++ {
+		if x.DD[i] != 0 {
+			x.DD[i] = 4
+		}
+	}
+}
+
+func (x *t20210203) mid4() { //修改值内容生效不影响原生数组
+	x.DD = []int{}
 }
