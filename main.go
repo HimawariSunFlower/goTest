@@ -8,4 +8,6 @@ import (
 func main() {
 	test.Api()
 	algo.Api()
+
+	//test.TestAddId()
 }
