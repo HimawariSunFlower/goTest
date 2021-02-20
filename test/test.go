@@ -480,8 +480,23 @@ func TestSliceWithPass() {
 	ll := make([]int, 0)
 	ll = append(ll, []int{1, 2, 3, 4, 5, 6, 7, 8, 9}...)
 	fmt.Println(ll) //[1 2 3 4 5 6 7 8 9]
+
+	zz:=sortS(ll)
+	fmt.Println(ll,"||",zz) //like [9 3 1 8 2 4 6 5 7] || [9 3 1 8 2 4 6 5 7]
+
+	l2 := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}\
+	//函数里append会让里外slice指向不同值
+	z2:=TestAppend(l2)
+	fmt.Println(l2,"||",z2)//[1 2 3 4 5 6 7 8 9] || [1 2 3 4 5 6 7 8 9 1 2 34 5 3 67 8 2 90 3]
+	
+	mid1(l2)
 	mid1(ll)
+
+	fmt.Println("z2",z2) //[1 2 3 4 5 6 7 8 9 1 2 34 5 3 67 8 2 90 3]
+	fmt.Println("zz",zz) //[3 3 3 3 3 3 3 3 3]
 	fmt.Println(ll) //[3 3 3 3 3 3 3 3 3]
+	fmt.Println(l2) //[3 3 3 3 3 3 3 3 3]
+
 	X := new(t20210203)
 	X.DD = ll
 	X.mid2()
@@ -494,8 +509,7 @@ func TestSliceWithPass() {
 	fmt.Println(X.DD) //[]
 	fmt.Println(ll)   //[4 4 4 4 4 4 4 4 4]
 
-	//todo test=>函数里append会让里外slice指向不同值
-	//todo test=>copy()效果
+	//copy()改引用为复制可以避免slice共用值导致的异常
 }
 
 func mid1(s []int) {
@@ -540,4 +554,22 @@ func (x t20210203) mid3() { //修改值内容生效并且影响原生数组
 
 func (x *t20210203) mid4() { //修改值内容生效不影响原生数组
 	x.DD = []int{}
+}
+
+func sortS(s []int) []int{
+	if len(s) <= 1 {
+		return s
+	}
+	j := 0
+	for i := len(s) - 1; i > 0; i-- {
+		j = RandomN(i)
+		s[i], s[j] = s[j], s[i]
+	}
+	return s
+}
+
+
+func TestAppend(s []int) []int{
+	s = append(s, []int{1,2,34,5,3,67,8,2,90,3}...)
+	return s
 }
