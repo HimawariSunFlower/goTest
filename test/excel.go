@@ -3,11 +3,12 @@ package test
 import (
 	r "crypto/rand"
 	"fmt"
-	"github.com/360EntSecGroup-Skylar/excelize/v2"
 	"math/big"
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/360EntSecGroup-Skylar/excelize/v2"
 )
 
 //test 抽奖概率
@@ -23,16 +24,16 @@ func TestAddId() {
 		fmt.Println(err)
 	}
 
-	row1:=map[string]string{
+	row1 := map[string]string{
 		"A1": "id",
 		"B1": "普通",
-		"C1":"优秀",
-		"D1":"精良",
-		"E1":"史诗",
-		"F1":"传说",
-		"G1":"神话",
+		"C1": "优秀",
+		"D1": "精良",
+		"E1": "史诗",
+		"F1": "传说",
+		"G1": "神话",
 	}
-	for k,v:=range row1{
+	for k, v := range row1 {
 		if err := streamWriter.SetRow(k, []interface{}{excelize.Cell{StyleID: styleID, Value: v}}); err != nil {
 			fmt.Println(err)
 			return
@@ -155,7 +156,7 @@ func (a *AttrRandId) Unmarshal(source string) error {
 	for _, v := range item {
 		line := strings.Split(v, ":")
 		if len(line) != 2 {
-			//todo日志记录
+			//todo error
 		} else {
 			id, _ := strconv.Atoi(line[0])
 			rate, _ := strconv.Atoi(line[1])

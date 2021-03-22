@@ -68,6 +68,14 @@ func Api() {
 
 	//测试 slice 传值问题
 	TestSliceWithPass()
+	/*
+		  	如果传递slice,不同地方都可能改变slice的值的话,使用copy等赋值的方法,而不是直接传递原slice.
+			就算只是读取,但是原slice有重新排序或者改变值的操作,也要使用复制而不是值传递,
+			因为都指向一个原slice,原slice的改变会影响值传递获得的slice的值,数据不可信.
+	*/
+
+	//测试在rangemap的时候delete参数
+	TestMapRangeWithDel()
 }
 
 //-----------------------test  utils func-------------
@@ -114,6 +122,7 @@ func IsIdCard(idCard string) (res bool, err error) {
 }
 
 func testRegexp(inf string) {
+	fmt.Println("---------------testRegexp---------------")
 	//解析正则表达式，如果成功返回解释器
 	reg1 := regexp.MustCompile(`^[1-9]\d{5}(18|19|20)(\d{2})(0[1-9]|1[0-2])([0-2][1-9]|10|20|30|31)\d{3}[0-9Xx]$`)
 	if reg1 == nil { //解释失败，返回nil
@@ -129,6 +138,7 @@ func testRegexp(inf string) {
 // 	params := reg.FindStringSubmatch(identification_number)
 
 func testRegexp2(s string) {
+	fmt.Println("---------------testRegexp2---------------")
 	res, err := regexp.Match("[1-9]\\d{5}(18|19|20)(\\d{2})(0[1-9]|1[0-2])([0-2][1-9]|10|20|30|31)\\d{3}[0-9Xx]$", []byte(s))
 	fmt.Println(res)
 	if err != nil {
@@ -174,7 +184,19 @@ func GenerateRandomNumber(randObj *rand.Rand, start int, end int, count int) []i
 }
 
 //-----------------test  slice [:]------------------
+type s2021 struct {
+	d []*ins2021
+}
+type ins2021 struct {
+	a int
+}
+
 func testSlice() { //测试slice[:]
+	fmt.Println("---------------testSlice---------------")
+	x := new(s2021)
+	fmt.Println(*x)
+	x.d = append(x.d, &ins2021{a: 2})
+	fmt.Println(*x)
 	// ll := make([]int, 0)
 	// for i := 0; i < 20; i++ {
 	// 	ll = append(ll, i)
@@ -206,13 +228,15 @@ func testSlice() { //测试slice[:]
 	// 	}
 	// }
 	s := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
-	//fmt.Println(effectTyp[:2], effectTyp[2+1:]) //:的机制是 [1:2)
+	//fmt.Println(s[:2], s[2+1:]) //[:]的机制是 [1:2) // [1 2] [4 5 6 7 8 9]
+	//fmt.Println(s[:len(s)], "xx")
+
 	// list := make([]interface{}, 0)
-	// list = append(list, effectTyp)
+	// list = append(list, s)
 	// fmt.Println(list)
-	// for i := 0; i < len(effectTyp); {
+	// for i := 0; i < len(s); {
 	//
-	// 	effectTyp = effectTyp[:len(effectTyp)-1]
+	// 	s = s[:len(s)-1]
 	// }
 	for i := 0; i < len(s); i++ {
 		//if InArray(s[i], unsame) {
@@ -221,6 +245,7 @@ func testSlice() { //测试slice[:]
 		i--
 		//}
 	}
+
 }
 
 //-------------test  map => slice's value--------
@@ -246,6 +271,7 @@ type b struct {
 var defaultA = &a{}
 
 func testMapWithSameData() { //指针指向相同内存,修改data数据,map的val也变化,delet原来的key,map[newKey]=>oldVal就可以了
+	fmt.Println("---------------testMapWithSameData---------------")
 	ll := []*b{}
 	for i := 0; i < 10; i++ {
 		ll = append(ll, &b{name: "aaa", id: i})
@@ -266,6 +292,7 @@ type Foo struct {
 }
 
 func TestReflect() {
+	fmt.Println("---------------TestReflect---------------")
 	// Struct
 	f := &Foo{A: 10, B: "Salutations"}
 
@@ -400,6 +427,7 @@ const (
 type flag uintptr
 
 func TestFlag() {
+	fmt.Println("---------------TestFlag---------------")
 	ll := make([]flag, 0)
 	ll = []flag{flagKindWidth, flagKindMask, flagStickyRO, flagEmbedRO, flagIndir, flagAddr, flagMethod, flagMethodShift, flagRO}
 	for _, f := range ll {
@@ -418,6 +446,7 @@ type xx struct {
 }
 
 func TestPtrInSlice() {
+	fmt.Println("---------------TestPtrInSlice---------------")
 	ac := makeXx()
 	// ll := make([]*xx, 0)
 
@@ -447,6 +476,7 @@ func makeXx() *xx {
 }
 
 func (x *xx) TestPtrInSliceMethod() {
+	fmt.Println("---------------TestPtrInSliceMethod---------------")
 	ll := make([]*b, 0)
 	ll = x.a //ll=append(ll,x.a[0])
 	for _, v := range ll {
@@ -464,11 +494,27 @@ type yy struct {
 func (y *yy) TestMethodWithValueReceiver() *xx {
 	return &y.x
 }
-
+func (y yy) Changex() {
+	y.x = xx{}
+}
+func (y yy) changeX() {
+	z := &y
+	z.x = xx{}
+}
+func (y *yy) changeY() {
+	y.x = xx{}
+}
 func TestValueReceiver() {
+	fmt.Println("---------------TestValueReceiver---------------")
 	z := new(yy)
 	z.x = *makeXx()
-	fmt.Print(z.TestMethodWithValueReceiver())
+	fmt.Println(z.TestMethodWithValueReceiver())
+	z.Changex()
+	fmt.Println(z.TestMethodWithValueReceiver())
+	z.changeX()
+	fmt.Println(z.TestMethodWithValueReceiver())
+	z.changeY()
+	fmt.Println(z.TestMethodWithValueReceiver())
 }
 
 //-----------------------------
@@ -477,25 +523,26 @@ type t20210203 struct {
 }
 
 func TestSliceWithPass() {
+	fmt.Println("---------------TestSliceWithPass---------------")
 	ll := make([]int, 0)
 	ll = append(ll, []int{1, 2, 3, 4, 5, 6, 7, 8, 9}...)
 	fmt.Println(ll) //[1 2 3 4 5 6 7 8 9]
 
-	zz:=sortS(ll)
-	fmt.Println(ll,"||",zz) //like [9 3 1 8 2 4 6 5 7] || [9 3 1 8 2 4 6 5 7]
+	zz := sortS(ll)
+	fmt.Println(ll, "||", zz) //like [9 3 1 8 2 4 6 5 7] || [9 3 1 8 2 4 6 5 7]
 
-	l2 := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}\
+	l2 := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
 	//函数里append会让里外slice指向不同值
-	z2:=TestAppend(l2)
-	fmt.Println(l2,"||",z2)//[1 2 3 4 5 6 7 8 9] || [1 2 3 4 5 6 7 8 9 1 2 34 5 3 67 8 2 90 3]
-	
+	z2 := TestAppend(l2)
+	fmt.Println(l2, "||", z2) //[1 2 3 4 5 6 7 8 9] || [1 2 3 4 5 6 7 8 9 1 2 34 5 3 67 8 2 90 3]
+
 	mid1(l2)
 	mid1(ll)
 
-	fmt.Println("z2",z2) //[1 2 3 4 5 6 7 8 9 1 2 34 5 3 67 8 2 90 3]
-	fmt.Println("zz",zz) //[3 3 3 3 3 3 3 3 3]
-	fmt.Println(ll) //[3 3 3 3 3 3 3 3 3]
-	fmt.Println(l2) //[3 3 3 3 3 3 3 3 3]
+	fmt.Println("z2", z2) //[1 2 3 4 5 6 7 8 9 1 2 34 5 3 67 8 2 90 3]
+	fmt.Println("zz", zz) //[3 3 3 3 3 3 3 3 3]
+	fmt.Println(ll)       //[3 3 3 3 3 3 3 3 3]
+	fmt.Println(l2)       //[3 3 3 3 3 3 3 3 3]
 
 	X := new(t20210203)
 	X.DD = ll
@@ -556,7 +603,7 @@ func (x *t20210203) mid4() { //修改值内容生效不影响原生数组
 	x.DD = []int{}
 }
 
-func sortS(s []int) []int{
+func sortS(s []int) []int {
 	if len(s) <= 1 {
 		return s
 	}
@@ -568,8 +615,25 @@ func sortS(s []int) []int{
 	return s
 }
 
-
-func TestAppend(s []int) []int{
-	s = append(s, []int{1,2,34,5,3,67,8,2,90,3}...)
+func TestAppend(s []int) []int {
+	s = append(s, []int{1, 2, 34, 5, 3, 67, 8, 2, 90, 3}...)
 	return s
+}
+
+func TestMapRangeWithDel() {
+	fmt.Println("--------------TestMapRangeWithDel-----------")
+	m := map[int]int{}
+
+	m[0] = 0
+	m[1] = 1
+	m[2] = 2
+	for k, _ := range m {
+		if k == 1 {
+			delete(m, k)
+			continue
+		}
+		delete(m, k)
+		//m[k] = v + 1
+	}
+	fmt.Println(m) //[0:1 2:3]
 }
