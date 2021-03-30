@@ -1,6 +1,7 @@
 package algo
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -40,4 +41,18 @@ func Benchmark2(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		merge_sort(ll, len(ll))
 	}
+}
+
+func BenchmarkQueue(b *testing.B) {
+	test := newQueue()
+	for i := 0; i < b.N; i++ {
+		test.Push(i)
+		if i%10 > 5 {
+			test.Pop()
+		}
+		if i%10 < 3 {
+			test.Top()
+		}
+	}
+	fmt.Println(test.left, test.right, test.cap, test.Top())
 }
