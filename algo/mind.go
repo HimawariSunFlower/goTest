@@ -10,6 +10,7 @@ func MindApi() {
 	str := "我佛了"
 	fmt.Println(stringToBytes(str))
 	fmt.Println(stringToBytes2(str))
+	testQueue()
 }
 
 func stringToBytes(str string) []byte {
@@ -38,7 +39,7 @@ func newQueue() *Queue {
 	return new(Queue).Init()
 }
 func (q *Queue) Init() *Queue {
-	q.data = make([]interface{}, 0, defaultCap)
+	q.data = make([]interface{}, defaultCap, defaultCap)
 	q.left, q.right, q.cap = 0, 0, defaultCap
 	return q
 }
@@ -57,7 +58,7 @@ func (q *Queue) Push(inf interface{}) {
 
 func (q *Queue) push(inf interface{}) {
 	q.lazyExpand()
-	q.data = append(q.data, inf)
+	q.data[q.right] = inf
 	q.right++
 }
 
@@ -113,4 +114,16 @@ func (q *Queue) lazyShrink() {
 		q.left, q.right = 0, 0
 		q.data = q.data[:0]
 	}
+}
+
+//测试实际效果
+func testQueue() {
+	t := newQueue()
+	for i := 0; i < 99; i++ {
+		t.push(i)
+	}
+	k, _ := t.Pop()
+	k2, _ := t.Pop()
+	fmt.Print(k, k2)
+	fmt.Println(t)
 }

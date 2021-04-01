@@ -4,6 +4,8 @@ import "fmt"
 
 func MathApi() {
 	testBitOperation()
+	_Modulo(32)
+	_Modulo(64)
 }
 
 // 1.负数等于正数取反加一。
@@ -30,4 +32,10 @@ func _rgtrgt(i, n int) int {
 	i >>= n
 	fmt.Println(i)
 	return i
+}
+
+func _Modulo(num int) {
+	for i := 0; i < 100; i++ {
+		fmt.Println(i, " ", i%num)
+	}
 }

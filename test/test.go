@@ -76,6 +76,8 @@ func Api() {
 
 	//测试在rangemap的时候delete参数
 	TestMapRangeWithDel()
+
+	fmt.Println(randNSlice(4, 5))
 }
 
 //-----------------------test  utils func-------------
@@ -636,4 +638,27 @@ func TestMapRangeWithDel() {
 		//m[k] = v + 1
 	}
 	fmt.Println(m) //[0:1 2:3]
+}
+
+func randNSlice(len, n int) []int {
+	ll := []int{}
+	for i := 0; i < len; i++ {
+		ll = append(ll, i)
+	}
+	if len <= n {
+		return ll
+	}
+	return SliceIntRandomShuffle(ll)[:n]
+}
+
+func SliceIntRandomShuffle(s []int) []int {
+	if len(s) <= 1 {
+		return s
+	}
+	j := 0
+	for i := len(s) - 1; i > 0; i-- {
+		j = rand.Intn(i)
+		s[i], s[j] = s[j], s[i]
+	}
+	return s
 }
