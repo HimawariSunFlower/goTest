@@ -43,6 +43,7 @@ func Benchmark2(b *testing.B) {
 	}
 }
 
+//BenchmarkQueue-12    	 4071702	       286 ns/op
 func BenchmarkQueue(b *testing.B) {
 	test := newQueue()
 	for i := 0; i < b.N; i++ {
