@@ -1,11 +1,23 @@
 package algo
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 func MathApi() {
 	testBitOperation()
 	_Modulo(32)
 	_Modulo(64)
+
+	fmt.Println("----------------")
+	//fmt.Println((int(time.Now().Unix()) - 1619712000) | _leflef(99999-1000, 29)) //2021 5 17 18 :
+	r:=time.Now().Unix()-1619712000
+	v:=int64(99999-1000)<<29
+	fmt.Printf("%F\n",float64(r | v))
+	fmt.Printf("%F\n",float64(r | int64(99999-1200)<<29))
+	fmt.Printf("%F\n",float64(r | int64(99999-1001)<<29))
+	fmt.Printf("%F\n",float64((r-20000) | int64(99999-1000)<<29))
 }
 
 // 1.负数等于正数取反加一。

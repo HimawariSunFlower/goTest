@@ -23,6 +23,9 @@ func Api() {
 	testRegexp("221033199902022222")
 	testRegexp2("221033199902022222")
 
+	str := "time='2021-07-24T05:50:51+08:00' level=debug msg='雷公 增加15010004属性百分比 100' Acc=yindao104 UID=242 fid=1627077050 pet=291425748946 pos=15"
+	reg := regexp.MustCompile(`Acc=\w+ UID=\d+ fid=\d+`)
+	fmt.Println(reg.FindAllString(str, -1))
 	////cmd测试
 	//cmd := exec.Command("rysnc", "--version")
 	//f, err := exec.LookPath("rsync")
@@ -78,6 +81,8 @@ func Api() {
 	TestMapRangeWithDel()
 
 	fmt.Println(randNSlice(4, 5))
+
+	testSliceCopy()
 }
 
 //-----------------------test  utils func-------------
@@ -661,4 +666,54 @@ func SliceIntRandomShuffle(s []int) []int {
 		s[i], s[j] = s[j], s[i]
 	}
 	return s
+}
+
+func testSliceCopy() {
+	p := &a{}
+	p.data = []*b{}
+	for i := 0; i < 10; i++ {
+		p.data = append(p.data, &b{id: i})
+	}
+
+	x := []*b{}
+	x = SliceCopy3(p, 5)
+	for _, v := range x {
+		fmt.Println(v.id) //SliceCopy 01234
+	}
+
+	j := 0
+	for i := len(sliceTest) - 1; i > 0; i-- {
+		j = RandomN(i + 1)
+		sliceTest[i], sliceTest[j] = sliceTest[j], sliceTest[i]
+	}
+
+	for _, v := range x {
+		fmt.Println(v.id) // SliceCopy 02143 SliceCopy2 40312 SliceCopy3 01234
+	}
+}
+
+var sliceTest = []*b{}
+
+func SliceCopy(data *a, len int) []*b {
+	sliceTest = sliceTest[:0]
+	sliceTest = data.data[:len]
+	return sliceTest
+}
+
+//新建一个slice直接指向sliceTest,相当于一个指向sliceTest的指针,sliceTest改变还是影响外层使用
+func SliceCopy2(data *a, len int) []*b {
+	ret := []*b{}
+	sliceTest = sliceTest[:0]
+	sliceTest = data.data[:len]
+	ret = sliceTest
+	return ret
+}
+
+//append添加底层指针到ret中,ret和sliceTest不再相关
+func SliceCopy3(data *a, len int) []*b {
+	ret := []*b{}
+	sliceTest = sliceTest[:0]
+	sliceTest = data.data[:len]
+	ret = append(ret, sliceTest...)
+	return ret
 }

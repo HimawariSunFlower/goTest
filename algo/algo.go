@@ -2,6 +2,7 @@ package algo
 
 import (
 	"fmt"
+	"sort"
 )
 
 func makeSlice(len int) []int {
@@ -188,4 +189,29 @@ func partition(A []int, l, r int) int { //todo 理解临界问题i,mid的传值
 	}
 	A[i+1], A[r] = A[r], A[i+1]
 	return i + 1
+}
+
+type persons struct {
+	data []*person
+}
+type person struct {
+	age  int
+	name string
+}
+
+func (p persons) Len() int      { return len(p.data) }
+func (p persons) Swap(i, j int) { p.data[i], p.data[j] = p.data[j], p.data[i] }
+
+func (p persons) Less(i, j int) bool {
+
+	return p.data[i].age < p.data[j].age
+}
+
+func TestLess() {
+	x := new(persons)
+	x.data = append(x.data, &person{age: 1, name: "1"})
+	x.data = append(x.data, &person{age: 12, name: "12"})
+	x.data = append(x.data, &person{age: 15, name: "15"})
+	sort.Sort(x)
+	fmt.Println(x.data[0].age, x.data[1].age, x.data[2].age)
 }
