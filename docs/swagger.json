@@ -1,0 +1,70 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "自用go语言测试",
+        "title": "goTest API",
+        "contact": {},
+        "version": "V114514"
+    },
+    "paths": {
+        "/test/testBitOperation/{param}/{type}": {
+            "get": {
+                "description": "param \"xx|yy\" type=1 xx\u003c\u003cyy ;type=2 xx\u003e\u003eyy",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "位运算",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "参数",
+                        "name": "param",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "类型",
+                        "name": "type",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200,\"data\":{},\"msg\":\"ok\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/test/testModulo/{param}": {
+            "get": {
+                "description": "param \"xx|yy\" xx%yy",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "取余",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "参数",
+                        "name": "param",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{\"code\":200,\"data\":{},\"msg\":\"ok\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,46 @@
+info:
+  contact: {}
+  description: 自用go语言测试
+  title: goTest API
+  version: V114514
+paths:
+  /test/testBitOperation/{param}/{type}:
+    get:
+      description: param "xx|yy" type=1 xx<<yy ;type=2 xx>>yy
+      parameters:
+      - description: 参数
+        in: path
+        name: param
+        required: true
+        type: string
+      - description: 类型
+        in: path
+        name: type
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"data":{},"msg":"ok"}'
+          schema:
+            type: string
+      summary: 位运算
+  /test/testModulo/{param}:
+    get:
+      description: param "xx|yy" xx%yy
+      parameters:
+      - description: 参数
+        in: path
+        name: param
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"code":200,"data":{},"msg":"ok"}'
+          schema:
+            type: string
+      summary: 取余
+swagger: "2.0"
