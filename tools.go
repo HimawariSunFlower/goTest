@@ -17,3 +17,26 @@ func splitToInt(val string, sep string) []int {
 	}
 	return ret
 }
+
+var bits = 64
+
+type BitSet int64
+
+func (p BitSet) Has(key int) bool {
+	return int64(p)&(1<<(key%bits)) != 0
+}
+
+func (p *BitSet) Set(key int) {
+	*p = BitSet(int64(*p) | 1<<(key%bits))
+}
+
+func (p *BitSet) Unset(key int) {
+	*p = BitSet(int64(*p) ^ (1 << (key % bits)))
+}
+
+func (p BitSet) Check(key int) int32 {
+	if p.Has(key) {
+		return 1
+	}
+	return 0
+}

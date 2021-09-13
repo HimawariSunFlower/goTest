@@ -5,27 +5,43 @@ import (
 	"math/rand"
 	"reflect"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func Api() {
-	//身份证校验 正则
-	fmt.Println(time.Now().Hour())
-	fmt.Println(GetAgeWithIdentificationNumber("430929199811113115")) //5224261981110555X 0 error
-	res, _ := IsIdCard("430929199811113115")
-	if res {
-		fmt.Println("验证通过")
-	} else {
-		fmt.Println("验证失败")
-	}
-	testRegexp("221033199902022222")
-	testRegexp2("221033199902022222")
+func GetFunctionName(i interface{}) string {
+	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
+}
 
-	str := "time='2021-07-24T05:50:51+08:00' level=debug msg='雷公 增加15010004属性百分比 100' Acc=yindao104 UID=242 fid=1627077050 pet=291425748946 pos=15"
-	reg := regexp.MustCompile(`Acc=\w+ UID=\d+ fid=\d+`)
-	fmt.Println(reg.FindAllString(str, -1))
+//todo 格式化
+func Api() {
+	printMy := func(f func()) {
+		fmt.Println("----------------" + reflect.TypeOf(f).Name() + "------------------")
+		f()
+		fmt.Println("----------------  END ----------------------")
+	}
+	printMys := func(f func(string), data string) {
+		fmt.Println("----------------" + GetFunctionName(f) + "------------------")
+		f(data)
+		fmt.Println("----------------  END ----------------------")
+	}
+
+	//身份证校验 正则
+	fmt.Println("time.hour =>", time.Now().Hour())
+
+	printMys(GetAgeWithIdentificationNumber, "430929199811113115")
+
+	printMys(IsIdCard, "430929199811113115")
+
+	printMys(testRegexp, "221033199902022222")
+	printMys(testRegexp2, "221033199902022222")
+
+	// str := "time='2021-07-24T05:50:51+08:00' level=debug msg='xxxxx' Acc=xx UID=1 fid=1627077050 pet=291425748946 pos=15"
+	// reg := regexp.MustCompile(`Acc=\w+ UID=\d+ fid=\d+`)
+	// fmt.Println(reg.FindAllString(str, -1))
+
 	////cmd测试
 	//cmd := exec.Command("rysnc", "--version")
 	//f, err := exec.LookPath("rsync")
@@ -34,7 +50,7 @@ func Api() {
 	//}
 
 	//随机数测试
-	fmt.Print(GenerateRandomNumber(nil, 2, 2, 1))
+	printMy(GenerateRandomNumber)
 
 	//测试slice[:]
 	testSlice()
@@ -83,6 +99,14 @@ func Api() {
 	fmt.Println(randNSlice(4, 5))
 
 	testSliceCopy()
+
+	printMy(demo)
+
+	printMy(testNil)
+
+	printMy(testNumDay)
+
+	printMy(mapTest)
 }
 
 //-----------------------test  utils func-------------
@@ -103,16 +127,16 @@ func splitToInt(val string, sep string) []int {
 
 //-------------------test  regexp-----------------------
 
-func GetAgeWithIdentificationNumber(identification_number string) int {
+func GetAgeWithIdentificationNumber(identification_number string) {
 	if identification_number == "" {
-		return 0
+		return
 	}
 	reg := regexp.MustCompile(`^[1-9]\d{5}(18|19|20)(\d{2})((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$`)
 	//reg := regexp.MustCompile(`^[1-9]\d{5}(18|19|20)`)
 	params := reg.FindStringSubmatch(identification_number)
 	if len(params) == 0 {
 		fmt.Errorf("reg error")
-		return 0
+		return
 	}
 	birYear, _ := strconv.Atoi(params[1] + params[2])
 	birMonth, _ := strconv.Atoi(params[3])
@@ -120,16 +144,20 @@ func GetAgeWithIdentificationNumber(identification_number string) int {
 	if int(time.Now().Month()) < birMonth {
 		age--
 	}
-	return age
+	fmt.Println(identification_number, " age=> ", age)
 }
 
-func IsIdCard(idCard string) (res bool, err error) {
-	res, err = regexp.Match("^[1-9]\\d{7}((0\\d)|(1[0-2]))(([0|1|2]\\d)|3[0-1])\\d{3}$|^[1-9]\\d{5}[1-9]\\d{3}((0\\d)|(1[0-2]))(([0|1|2]\\d)|3[0-1])\\d{3}([0-9]|X)$", []byte(idCard))
+func IsIdCard(idCard string) {
+	res, err := regexp.Match("^[1-9]\\d{7}((0\\d)|(1[0-2]))(([0|1|2]\\d)|3[0-1])\\d{3}$|^[1-9]\\d{5}[1-9]\\d{3}((0\\d)|(1[0-2]))(([0|1|2]\\d)|3[0-1])\\d{3}([0-9]|X)$", []byte(idCard))
+	if res {
+		fmt.Println(idCard, " 验证通过")
+	} else {
+		fmt.Println(idCard, " 验证失败", err)
+	}
 	return
 }
 
 func testRegexp(inf string) {
-	fmt.Println("---------------testRegexp---------------")
 	//解析正则表达式，如果成功返回解释器
 	reg1 := regexp.MustCompile(`^[1-9]\d{5}(18|19|20)(\d{2})(0[1-9]|1[0-2])([0-2][1-9]|10|20|30|31)\d{3}[0-9Xx]$`)
 	if reg1 == nil { //解释失败，返回nil
@@ -138,27 +166,29 @@ func testRegexp(inf string) {
 	}
 	//根据规则提取关键信息
 	result1 := reg1.FindStringSubmatch(inf)
-	fmt.Println("result1 = ", result1)
+	fmt.Println(inf, " result1 = ", result1)
 }
 
 // reg := regexp.MustCompile(`^[1-9]\d{5}(18|19|20)(\d{2})((0[1-9])|(1[0-2]))(([0-2][1-9])|10|20|30|31)\d{3}[0-9Xx]$`)
 // 	params := reg.FindStringSubmatch(identification_number)
 
 func testRegexp2(s string) {
-	fmt.Println("---------------testRegexp2---------------")
 	res, err := regexp.Match("[1-9]\\d{5}(18|19|20)(\\d{2})(0[1-9]|1[0-2])([0-2][1-9]|10|20|30|31)\\d{3}[0-9Xx]$", []byte(s))
-	fmt.Println(res)
+	fmt.Println(s, " result2 = ", res)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Println("regexp err", err)
 	}
 }
 
 //---------------------test random method-----------------
+func GenerateRandomNumber() {
+	generateRandomNumber(nil, 2, 2, 1)
+}
 
-func GenerateRandomNumber(randObj *rand.Rand, start int, end int, count int) []int {
+func generateRandomNumber(randObj *rand.Rand, start int, end int, count int) {
 	//范围检查
 	if end < start || (end-start) < count {
-		return nil
+		return
 	}
 
 	//存放结果的slice
@@ -187,7 +217,8 @@ func GenerateRandomNumber(randObj *rand.Rand, start int, end int, count int) []i
 		}
 	}
 
-	return nums
+	fmt.Printf("start %d, end %d, count %d,ret => %v", start, end, count, nums)
+
 }
 
 //-----------------test  slice [:]------------------
@@ -716,4 +747,86 @@ func SliceCopy3(data *a, len int) []*b {
 	sliceTest = data.data[:len]
 	ret = append(ret, sliceTest...)
 	return ret
+}
+
+func demo() {
+	num := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+	num2 := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20}
+	for _, v := range num {
+		for _, vv := range num2 {
+			fmt.Println(fmt.Sprintf("%d|%d =>%d , %d&%d =>%d)", v, vv, v|vv, v, vv, v&vv))
+		}
+	}
+	for _, v := range num {
+		fmt.Println(fmt.Sprintf("%d<<(1) => %d(^=> %d) , %d<<(0) => %d(^=> %d)", v, (v << 1), ^(v << 1), v, ^(v << 0), ^(v << 0)))
+	}
+}
+
+func testNil() {
+	var x interface{} = nil
+	var y *int = nil //有数据结构原型
+	interfaceIsNil(x)
+	interfaceIsNil(y)
+}
+
+func interfaceIsNil(x interface{}) {
+	if x == nil {
+		fmt.Println("empty interface")
+		return
+	}
+	fmt.Println("non-empty interface")
+}
+
+type Mynum struct {
+	num     int
+	endtime int64
+}
+
+func testNumDay() {
+	v := &Mynum{}
+	v.first()
+}
+
+func (p *Mynum) first() { //num 85 1610726400
+	num := (GetOpenDay() + 1) / 2
+	p.Second(num, true)
+	num2 := (GetOpenDay()) / 2
+	p.Second(num2, false)
+}
+func (p *Mynum) Second(i int, ck bool) {
+	p.num = i
+	if ck {
+		p.endtime = time.Unix(1625068800, 0).AddDate(0, 0, p.num*2).Unix()
+	} else {
+		p.endtime = time.Unix(1625068800, 0).AddDate(0, 0, p.num*2+1).Unix()
+	}
+
+}
+func GetOpenDay() int {
+	sec := time.Now().Unix() - 1625068800
+	return int(sec/(3600*24)) + 1
+}
+
+func max(a, b int) int {
+	if a >= b {
+		return a
+	}
+	return b
+}
+
+type bb struct {
+	id   int
+	data *b
+}
+
+func mapTest() {
+	base := &bb{id: 1}
+	base.data = &b{name: "x"}
+
+	m := make(map[int]*b)
+	m[1] = base.data
+	base.data = nil
+	fmt.Println(m)
+	fmt.Println(base)
+
 }
