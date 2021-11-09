@@ -136,6 +136,17 @@ func todo3() {
 	val.Set(1)
 
 	if m[1].Has(1) {
-		fmt.Print(11)
+		fmt.Println(11)
 	}
+
+	x, ok := mp[0]
+	fmt.Println(x, ok) //0 false
+
+	ll := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5}
+	ll = ll[len(ll)-20:]
+	fmt.Println(ll, len(ll))
 }
+
+var mp = make(map[int]int)
+
+func init() { mp[1] = 1; mp[2] = 2 }
