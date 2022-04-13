@@ -53,7 +53,7 @@ func Api() {
 	printMy(GenerateRandomNumber)
 
 	//测试slice[:]
-	testSlice()
+	TestSlice()
 
 	//测试map指向数据,改变数据
 	testMapWithSameData()
@@ -107,6 +107,8 @@ func Api() {
 	printMy(testNumDay)
 
 	printMy(mapTest)
+
+	printMy(timeDay)
 }
 
 //-----------------------test  utils func-------------
@@ -219,107 +221,6 @@ func generateRandomNumber(randObj *rand.Rand, start int, end int, count int) {
 
 	fmt.Printf("start %d, end %d, count %d,ret => %v", start, end, count, nums)
 
-}
-
-//-----------------test  slice [:]------------------
-type s2021 struct {
-	d []*ins2021
-}
-type ins2021 struct {
-	a int
-}
-
-func testSlice() { //测试slice[:]
-	fmt.Println("---------------testSlice---------------")
-	x := new(s2021)
-	fmt.Println(*x)
-	x.d = append(x.d, &ins2021{a: 2})
-	fmt.Println(*x)
-	// ll := make([]int, 0)
-	// for i := 0; i < 20; i++ {
-	// 	ll = append(ll, i)
-	// 	if len(ll) > 10 {
-	// 		// fmt.Print(len(ll))
-	// 		// ll = ll[len(ll)-9:]
-	// 		ll = ll[:10]
-	// 	}
-	// }
-	// fmt.Print(len(ll))
-	// fmt.Print(ll)
-	// fmt.Print(ll[:1])
-	// //slice测试
-	// fmt.Print(f)
-	// v := []int{1, 2, 3}
-	// fmt.Print(v[2:], v[2], v[:0])
-	// for i := 0; i < 10; i++ {
-	// 	continue
-	// 	fmt.Print("太弱智了")
-	// }
-	// actionAgainU := []int{1, 2, 3, 4}
-	// for i := 0; i < 100; i++ {
-	// 	if len(actionAgainU) != 0 {
-	// 		fmt.Println(actionAgainU[0])
-	// 		actionAgainU = actionAgainU[1:]
-	// 		fmt.Println(actionAgainU)
-	// 	} else {
-	// 		break
-	// 	}
-	// }
-	s := []int{1, 2, 3, 4, 5, 6, 7, 8, 9}
-	//fmt.Println(s[:2], s[2+1:]) //[:]的机制是 [1:2) // [1 2] [4 5 6 7 8 9]
-	//fmt.Println(s[:len(s)], "xx")
-
-	// list := make([]interface{}, 0)
-	// list = append(list, s)
-	// fmt.Println(list)
-	// for i := 0; i < len(s); {
-	//
-	// 	s = s[:len(s)-1]
-	// }
-	for i := 0; i < len(s); i++ {
-		//if InArray(s[i], unsame) {
-		s = append(s[:i], s[i+1:]...)
-		fmt.Println(s)
-		i--
-		//}
-	}
-
-}
-
-//-------------test  map => slice's value--------
-
-type a struct {
-	data  []*b
-	mapId map[int]*b
-}
-
-func (a *a) newA(ll []*b) {
-	a.data = ll
-	a.mapId = make(map[int]*b, len(ll))
-	for _, v := range ll {
-		a.mapId[v.id] = v
-	}
-}
-
-type b struct {
-	name string
-	id   int
-}
-
-var defaultA = &a{}
-
-func testMapWithSameData() { //指针指向相同内存,修改data数据,map的val也变化,delet原来的key,map[newKey]=>oldVal就可以了
-	fmt.Println("---------------testMapWithSameData---------------")
-	ll := []*b{}
-	for i := 0; i < 10; i++ {
-		ll = append(ll, &b{name: "aaa", id: i})
-	}
-	defaultA.newA(ll)
-	for _, v := range defaultA.data {
-		v.id = -1
-	}
-	fmt.Print(defaultA)
-	fmt.Print(defaultA.mapId[1])
 }
 
 //----------------------------test  reflect----------------
@@ -814,19 +715,16 @@ func max(a, b int) int {
 	return b
 }
 
-type bb struct {
-	id   int
-	data *b
+func timeDay() {
+	//今天0点+29天
+	println(time.Unix(GetTodayZero(), 0).AddDate(0, 0, 1).Unix())
 }
 
-func mapTest() {
-	base := &bb{id: 1}
-	base.data = &b{name: "x"}
+func BeginningOfDay() time.Time {
+	y, m, d := time.Now().Date()
+	return time.Date(y, m, d, 0, 0, 0, 0, time.Local)
+}
 
-	m := make(map[int]*b)
-	m[1] = base.data
-	base.data = nil
-	fmt.Println(m)
-	fmt.Println(base)
-
+func GetTodayZero() int64 {
+	return BeginningOfDay().Unix()
 }

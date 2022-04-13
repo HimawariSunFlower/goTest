@@ -24,6 +24,15 @@ var doc = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/test/test/": {
+            "get": {
+                "description": "print输出",
+                "produces": [
+                    "application/json"
+                ],
+                "summary": "测试按钮"
+            }
+        },
         "/test/testBitOperation/{param}/{type}": {
             "get": {
                 "description": "param \"xx|yy\" type=1 xx\u003c\u003cyy ;type=2 xx\u003e\u003eyy",

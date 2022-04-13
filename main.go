@@ -27,6 +27,10 @@ import (
 // @description 自用go语言测试
 // @in header
 func main() {
+	algo.Test()
+	test.TestSlice()
+	//test.TestPtr1()
+	return
 	zaplog.InitLogger()
 	//todo2()
 	todo3()
@@ -145,6 +149,11 @@ func todo3() {
 	ll := []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 1, 2, 3, 4, 5}
 	ll = ll[len(ll)-20:]
 	fmt.Println(ll, len(ll))
+
+	m2 := make(map[int]int)
+	for i := 0; i < 10; i++ {
+		m2[i] += i
+	}
 }
 
 var mp = make(map[int]int)

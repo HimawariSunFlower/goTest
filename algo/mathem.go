@@ -48,10 +48,16 @@ func testBitOperation(c *gin.Context) {
 	switch c.Param("Type") {
 	case "1":
 		ans := _leflef(num1, num2)
-		PrintMy(num1, ans, "testBitOperation")
+		PrintMy(num1, ans, "num1<<num2")
+		PrintMy(num1, num1|num2, "nums1|nums2")
+		PrintMy(num1, num1&num2, "nums1&nums2")
+		PrintMy(num1, num1^num2, "nums1^nums2")
 	case "2":
 		ans := _rgtrgt(num1, num2)
-		PrintMy(num1, ans, "testBitOperation")
+		PrintMy(num1, ans, "num1>>num2")
+		PrintMy(num1, num2|num1, "nums2|nums1")
+		PrintMy(num1, num2&num1, "nums2&nums1")
+		PrintMy(num1, num2^num1, "nums2^nums1")
 	default:
 		ErrParam(c, "BitOperation-Type")
 		return
@@ -108,4 +114,11 @@ func splitToInt(val string, sep string) []int {
 		ret[i] = vint
 	}
 	return ret
+}
+
+func Test() {
+	_leflef(1, 52)
+	_leflef(2, 52)
+	_leflef(3, 52)
+	_leflef(9997, 52)
 }

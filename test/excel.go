@@ -1,14 +1,19 @@
 package test
 
 import (
+	"bytes"
 	r "crypto/rand"
 	"fmt"
+	"io/ioutil"
 	"math/big"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
 
 	"github.com/360EntSecGroup-Skylar/excelize/v2"
+	"github.com/tealeg/xlsx"
 )
 
 //test 抽奖概率
@@ -248,4 +253,197 @@ func (a *AttrRandId) GenItems() []int {
 func RandomN(n int) int {
 	ret, _ := r.Int(r.Reader, big.NewInt(int64(n)))
 	return int(ret.Int64())
+}
+
+func ExcelToCsv() {
+	path, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	files, _ := ioutil.ReadDir("./table/")
+	for _, f := range files {
+		file := readExcelFile(path + "/table/" + f.Name())
+		err = parseSheetToCSV(file.Sheets[0], path+"/tablecsv/"+strings.ToLower(file.Sheets[0].Name)+".csv")
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func readExcelFile(path string) (f *xlsx.File) {
+	f, err := xlsx.OpenFile(path)
+	if err != nil {
+		fmt.Println("excel文件读取错误")
+		panic(err)
+	}
+	return
+}
+
+func parseSheetToCSV(sheet *xlsx.Sheet, toFile string) (err error) {
+	b := &bytes.Buffer{}
+	rows := sheet.MaxRow
+	for i := 0; i < rows; i++ {
+		cols := sheet.MaxCol
+		for j := 0; j < cols; j++ {
+			cell := sheet.Cell(i, j)
+			val := cell.Value
+			fmt.Println(val)
+			b.WriteString(val)
+			b.WriteString("\t")
+		}
+		b.WriteString("\r\n")
+	}
+	//写入数据到文件
+	err = ioutil.WriteFile(toFile, b.Bytes(), os.ModePerm)
+	return
+}
+
+type ZhiGou struct {
+	Id    int
+	Price int
+}
+
+var ZhiGous = []string{"id", "Price"}
+
+type meta struct {
+	Key string
+	Idx int
+	Typ string
+}
+
+type rowdata []interface{}
+
+func ExcelToJson() {
+	path, err := os.Getwd()
+	if err != nil {
+		panic(err)
+	}
+	files, _ := ioutil.ReadDir("./table/")
+	for _, f := range files {
+		parseFile(path + "/table/" + f.Name())
+	}
+}
+
+func parseFile(file string) {
+
+	fmt.Println("\n\n\n\n", file)
+
+	xlsx, err := excelize.OpenFile(file)
+	if err != nil {
+		panic(err.Error())
+	}
+	//[line][colidx][data]
+
+	sheets := xlsx.GetSheetList()
+	for _, s := range sheets {
+		rows, err := xlsx.GetRows(s)
+		if err != nil {
+			return
+		}
+		if len(rows) < 5 {
+			return
+		}
+
+		colNum := len(rows[1])
+		fmt.Println("col num:", colNum)
+		metaList := make([]*meta, 0, colNum)
+		dataList := make([]rowdata, 0, len(rows)-4)
+
+		for line, row := range rows {
+			switch line {
+			case 0: // sheet 名
+
+			case 1: // col name
+				//fmt.Println("meta cot:%d, rol cot:%d", len(metaList), len(row))
+				// for idx, typ := range row {
+				// 	metaList[idx].Typ = typ
+				// }
+			case 2: // data type
+				for idx, colname := range row {
+					fmt.Println(idx, colname, len(metaList))
+					for _, v := range ZhiGous {
+						if v == colname {
+							metaList = append(metaList, &meta{Key: colname, Idx: idx, Typ: rows[1][idx]})
+						}
+					}
+				}
+
+			default: //>= 4 row data
+				data := make(rowdata, 0, colNum)
+
+				for k := 0; k < colNum; k++ {
+					for _, v := range metaList {
+						if v.Idx == k {
+							if k < len(row) {
+								data = append(data, row[k])
+							}
+						}
+					}
+				}
+
+				dataList = append(dataList, data)
+			}
+		}
+
+		//sheetName := xlsx.GetSheetName(idx)
+		// to json, save
+		filename := filepath.Base(file)
+		suf := filepath.Ext(filename)
+		jsonFile := fmt.Sprintf("%s.json", filename[:(len(filename)-len(suf))])
+		err = output(jsonFile, toJson(dataList, metaList))
+		if err != nil {
+			fmt.Println(err)
+		}
+		//fmt.Println(toJson(dataList, metaList))
+		return
+	}
+
+}
+
+func toJson(datarows []rowdata, metalist []*meta) string {
+	ret := "["
+
+	for _, row := range datarows {
+		ret += "\n\t{"
+		for idx, meta := range metalist {
+			ret += fmt.Sprintf("\n\t\t\"%s\":", meta.Key)
+			if meta.Typ == "string" {
+				if row[idx] == nil {
+					ret += "\"\""
+				} else {
+					ret += fmt.Sprintf("\"%s\"", row[idx])
+				}
+			} else {
+				if row[idx] == nil || row[idx] == "" {
+					ret += "0"
+				} else {
+					ret += fmt.Sprintf("%s", row[idx])
+				}
+			}
+			ret += ","
+		}
+		ret = ret[:len(ret)-1]
+
+		ret += "\n\t},"
+	}
+	ret = ret[:len(ret)-1]
+
+	ret += "\n]"
+	return ret
+}
+
+func output(filename string, str string) error {
+	path, _ := os.Getwd()
+	f, err := os.OpenFile(path+"/tablecsv/"+filename, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0777)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_, err = f.WriteString(str)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
